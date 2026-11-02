@@ -1,0 +1,211 @@
+mal: 1.000000000000000            # matchability-aware classification loss gain
+l1: 5.0000000000000000            # L1 box loss gain
+giou: 2.000000000000000           # GIoU box loss gain
+fgl: 0.150000000000000            # fine-grained localization loss gain
+ddf: 1.500000000000000            # decoupled distillation focal loss gain
+max_det: 300                      # detections per image (top-k over query x class, no NMS)
+area_threshold: 100               # copy-blend: min object area (pixels)
+num_objects: 3                    # copy-blend: objects pasted per image
+expand_ratios: [0.10, 0.25]       # copy-blend: context around pasted objects
+
+# Official DEIMv2 COCO recipes. `batch_size` is the total batch size, reached by gradient accumulation.
+# aug_epochs: [start, mosaic stop, stop] of mosaic / zoom-out / IoU-crop / photometric augmentation.
+# The last `no_aug_epoch` epochs restart from the best checkpoint without augmentation.
+atto: &hgnet
+  backbone: ~                     # PP-HGNetV2-B0 ImageNet weights are downloaded automatically
+  input_size: 320
+  batch_size: 128
+  epochs: 500
+  flat_epoch: 250                 # constant lr until this epoch, then cosine decay
+  no_aug_epoch: 32
+  warmup_iter: 4000
+  lr: 0.002
+  lr_backbone: 0.001
+  lr_gamma: 0.5                   # final lr = lr * lr_gamma
+  weight_decay: 0.0001
+  aug_epochs: [4, 250, 400]
+  mosaic: 0.3
+  mix_up: 0.0
+  mix_up_epochs: [0, 0]
+  copy_blend: 0.0
+  copy_blend_epochs: [0, 0]
+  multi_scale: 0                  # > 0: multi-scale training, the base size is repeated n times
+  min_size: 12                    # min box size after augmentation (pixels)
+  matcher_change_epoch: 450       # matching cost becomes -score * IoU^4
+  local: False                    # FGL + DDF losses
+  uni_set: False                  # box losses on the union of matches of all decoder layers
+femto:
+  <<: *hgnet
+  input_size: 416
+  lr: 0.0016
+  lr_backbone: 0.0008
+  mosaic: 0.5
+  min_size: 10
+pico:
+  <<: *hgnet
+  input_size: 640
+  lr: 0.0016
+  lr_backbone: 0.0008
+  mosaic: 0.5
+  min_size: 8
+n:
+  <<: *hgnet
+  input_size: 640
+  batch_size: 32
+  epochs: 160
+  flat_epoch: 78
+  no_aug_epoch: 12
+  warmup_iter: 2000
+  lr: 0.0008
+  lr_backbone: 0.0004
+  lr_gamma: 1.0
+  aug_epochs: [4, 78, 148]
+  mosaic: 0.5
+  mix_up: 0.5
+  mix_up_epochs: [4, 78]
+  copy_blend: 0.4
+  copy_blend_epochs: [4, 78]
+  min_size: 1
+  matcher_change_epoch: 136
+  local: True
+  uni_set: True
+s: &dinov3
+  backbone: ./weights/vitt_distill.pt
+  input_size: 640
+  batch_size: 32
+  epochs: 132
+  flat_epoch: 64
+  no_aug_epoch: 12
+  warmup_iter: 2000
+  lr: 0.0005
+  lr_backbone: 0.000025
+  lr_gamma: 0.5
+  weight_decay: 0.0001
+  aug_epochs: [4, 64, 120]
+  mosaic: 0.5
+  mix_up: 0.5
+  mix_up_epochs: [4, 64]
+  copy_blend: 0.5
+  copy_blend_epochs: [4, 120]
+  multi_scale: 20
+  min_size: 1
+  matcher_change_epoch: 100
+  local: True
+  uni_set: True
+m:
+  <<: *dinov3
+  backbone: ./weights/vittplus_distill.pt
+  epochs: 102
+  flat_epoch: 49
+  aug_epochs: [4, 49, 90]
+  mix_up_epochs: [4, 49]
+  copy_blend_epochs: [4, 90]
+  multi_scale: 6
+  matcher_change_epoch: 80
+l:
+  <<: *dinov3
+  backbone: ./weights/dinov3_vits16_pretrain_lvd1689m-08c60483.pth
+  epochs: 68
+  flat_epoch: 34
+  no_aug_epoch: 8
+  lr_backbone: 0.0000125
+  weight_decay: 0.000125
+  aug_epochs: [4, 34, 60]
+  mix_up_epochs: [4, 34]
+  copy_blend_epochs: [4, 60]
+  multi_scale: 3
+  matcher_change_epoch: 50
+x:
+  <<: *dinov3
+  backbone: ./weights/dinov3_vits16plus_pretrain_lvd1689m-4057cbaa.pth
+  epochs: 58
+  flat_epoch: 29
+  no_aug_epoch: 8
+  lr_backbone: 0.00001
+  weight_decay: 0.000125
+  aug_epochs: [4, 29, 50]
+  mix_up_epochs: [4, 29]
+  copy_blend_epochs: [4, 50]
+  multi_scale: 3
+  matcher_change_epoch: 45
+names:
+  0: person
+  1: bicycle
+  2: car
+  3: motorcycle
+  4: airplane
+  5: bus
+  6: train
+  7: truck
+  8: boat
+  9: traffic light
+  10: fire hydrant
+  11: stop sign
+  12: parking meter
+  13: bench
+  14: bird
+  15: cat
+  16: dog
+  17: horse
+  18: sheep
+  19: cow
+  20: elephant
+  21: bear
+  22: zebra
+  23: giraffe
+  24: backpack
+  25: umbrella
+  26: handbag
+  27: tie
+  28: suitcase
+  29: frisbee
+  30: skis
+  31: snowboard
+  32: sports ball
+  33: kite
+  34: baseball bat
+  35: baseball glove
+  36: skateboard
+  37: surfboard
+  38: tennis racket
+  39: bottle
+  40: wine glass
+  41: cup
+  42: fork
+  43: knife
+  44: spoon
+  45: bowl
+  46: banana
+  47: apple
+  48: sandwich
+  49: orange
+  50: broccoli
+  51: carrot
+  52: hot dog
+  53: pizza
+  54: donut
+  55: cake
+  56: chair
+  57: couch
+  58: potted plant
+  59: bed
+  60: dining table
+  61: toilet
+  62: tv
+  63: laptop
+  64: mouse
+  65: remote
+  66: keyboard
+  67: cell phone
+  68: microwave
+  69: oven
+  70: toaster
+  71: sink
+  72: refrigerator
+  73: book
+  74: clock
+  75: vase
+  76: scissors
+  77: teddy bear
+  78: hair drier
+  79: toothbrush

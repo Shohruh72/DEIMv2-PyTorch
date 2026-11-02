@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+weights/*
+!weights/.gitkeep
+*.cache
+*.onnx
+*.engine
