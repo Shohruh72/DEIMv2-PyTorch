@@ -16,18 +16,30 @@ pip install onnx tensorrt   # --export and *.engine inference
 
 ### Quick start
 
-* Download official COCO weights from the [Results](#results) table into `./weights`
+* Download weights from the [Download](#download) table into `./weights`
 * Run `python main.py --model s --demo --weights weights/DEIMv2_DINOv3_S_COCO.safetensors` (webcam, `q` to quit)
 
-### ONNX / TensorRT
+### Download
 
-Ready-made exports of `atto`, `n`, `s`, `x` are in [Releases](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/tag/v1.0):
+All weights are in [Releases](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/tag/v1.0), click a size to download:
 
-| File                 | Use                                                    |
-|:---------------------|:-------------------------------------------------------|
-| `*_COCO.onnx`        | onnxruntime, FP32, CPU or GPU                          |
-| `*_COCO_fp16.onnx`   | source of a TensorRT FP16 engine for your GPU          |
-| `*_COCO_fp16.engine` | prebuilt, runs only on RTX 4070 Laptop + TensorRT 11.4 |
+| Version | Input | Params | COCO AP | PyTorch | ONNX FP32 | ONNX FP16 | TensorRT FP16 |
+|:-------:|:-----:|-------:|--------:|--------:|----------:|----------:|--------------:|
+| atto | 320 | 0.5M | 23.7 | [2.1 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_ATTO_COCO.safetensors) | [2.5 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_ATTO_COCO.onnx) | [1.6 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_ATTO_COCO_fp16.onnx) | [4.9 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_ATTO_COCO_fp16.engine) |
+| femto | 416 | 1.0M | 31.0 | [4.0 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_FEMTO_COCO.safetensors) | [4.4 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_FEMTO_COCO.onnx) | [2.5 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_FEMTO_COCO_fp16.onnx) | [6.3 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_FEMTO_COCO_fp16.engine) |
+| pico | 640 | 1.5M | 38.5 | [6.3 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_PICO_COCO.safetensors) | [6.6 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_PICO_COCO.onnx) | [3.6 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_PICO_COCO_fp16.onnx) | [8.4 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_PICO_COCO_fp16.engine) |
+| n | 640 | 3.6M | 43.0 | [14.6 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_N_COCO.safetensors) | [14.9 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_N_COCO.onnx) | [7.8 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_N_COCO_fp16.onnx) | [11.4 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_HGNetv2_N_COCO_fp16.engine) |
+| s | 640 | 9.8M | 50.9 | [39.4 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_S_COCO.safetensors) | [40.2 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_S_COCO.onnx) | [20.8 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_S_COCO_fp16.onnx) | [29.5 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_S_COCO_fp16.engine) |
+| m | 640 | 18.2M | 53.0 | [73.8 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_M_COCO.safetensors) | [73.7 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_M_COCO.onnx) | [37.6 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_M_COCO_fp16.onnx) | [46.8 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_M_COCO_fp16.engine) |
+| l | 640 | 32.2M | 56.0 | [130.6 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_L_COCO.safetensors) | [130.0 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_L_COCO.onnx) | [65.8 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_L_COCO_fp16.onnx) | [74.6 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_L_COCO_fp16.engine) |
+| x | 640 | 50.4M | 57.8 | [205.3 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_X_COCO.safetensors) | [202.7 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_X_COCO.onnx) | [102.4 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_X_COCO_fp16.onnx) | [108.9 MB](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_X_COCO_fp16.engine) |
+
+* ONNX FP32: onnxruntime on CPU or GPU. ONNX FP16: source of a TensorRT engine for your GPU
+* TensorRT FP16: prebuilt on RTX 4070 Laptop + TensorRT 11.4 and runs only there, otherwise build it from ONNX FP16 (below)
+
+### Inference
+
+Examples use `s` (`DEIMv2_DINOv3_S_COCO`), replace it with any version of the table.
 
 ONNX Runtime:
 
