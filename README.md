@@ -149,7 +149,6 @@ Labels are YOLO format: `class cx cy w h`, normalized to [0, 1], one object per 
 #### Reference
 
 * https://github.com/Intellindust-AI-Lab/DEIMv2
-* https://github.com/jahongir7174/YOLOv11-pt
 
 #### License
 
