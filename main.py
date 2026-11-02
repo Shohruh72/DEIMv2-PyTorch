@@ -263,6 +263,10 @@ def load_model(args, params):
 
 
 def export(args, params):
+    if args.export == 'engine' and args.weights.endswith('.onnx'):
+        # TensorRT engine straight from a released ONNX (use *_fp16.onnx for an FP16 engine)
+        util.export_engine(args.weights, args.batch_size)
+        return
     model = load_model(args, params)
     name = os.path.splitext(args.weights or './weights/best.pt')[0]
     if args.export == 'onnx':
@@ -278,6 +282,8 @@ def demo(args, params):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if args.weights.endswith('.engine'):
         model = util.TensorRT(args.weights)
+    elif args.weights.endswith('.onnx'):
+        model = util.ONNX(args.weights)
     else:
         model = util.End2End(load_model(args, params).fuse(), params['max_det']).to(device).eval()
 

@@ -10,13 +10,54 @@ conda activate DEIM
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
 pip install opencv-python PyYAML scipy tqdm
 pip install safetensors     # official Hugging Face weights
-pip install onnx tensorrt   # only for --export
+pip install onnxruntime-gpu # *.onnx inference (or onnxruntime for CPU)
+pip install onnx tensorrt   # --export and *.engine inference
 ```
 
 ### Quick start
 
 * Download official COCO weights from the [Results](#results) table into `./weights`
 * Run `python main.py --model s --demo --weights weights/DEIMv2_DINOv3_S_COCO.safetensors` (webcam, `q` to quit)
+
+### ONNX / TensorRT
+
+Ready-made exports of `atto`, `n`, `s`, `x` are in [Releases](https://github.com/Shohruh72/DEIMv2-PyTorch/releases/tag/v1.0):
+
+| File                 | Use                                                    |
+|:---------------------|:-------------------------------------------------------|
+| `*_COCO.onnx`        | onnxruntime, FP32, CPU or GPU                          |
+| `*_COCO_fp16.onnx`   | source of a TensorRT FP16 engine for your GPU          |
+| `*_COCO_fp16.engine` | prebuilt, runs only on RTX 4070 Laptop + TensorRT 11.4 |
+
+ONNX Runtime:
+
+```
+wget -P weights https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_S_COCO.onnx
+python main.py --model s --demo --weights weights/DEIMv2_DINOv3_S_COCO.onnx
+```
+
+TensorRT (engines are not portable, build once on your GPU):
+
+```
+wget -P weights https://github.com/Shohruh72/DEIMv2-PyTorch/releases/download/v1.0/DEIMv2_DINOv3_S_COCO_fp16.onnx
+python main.py --model s --export engine --weights weights/DEIMv2_DINOv3_S_COCO_fp16.onnx
+python main.py --model s --demo --weights weights/DEIMv2_DINOv3_S_COCO_fp16.engine
+```
+
+`--model` must match the file. Without this repo, only `numpy`, `opencv-python` and `onnxruntime` are needed:
+
+```python
+import cv2, numpy, onnxruntime
+
+size = 640  # atto: 320, femto: 416, others: 640
+session = onnxruntime.InferenceSession('DEIMv2_DINOv3_S_COCO.onnx')
+image = cv2.imread('image.jpg')
+h, w = image.shape[:2]
+x = cv2.resize(image, (size, size))[..., ::-1].transpose(2, 0, 1)[None].astype(numpy.float32) / 255
+outputs = session.run(None, {'images': x})[0][0]  # (300, 6): x1, y1, x2, y2, score, class
+outputs = outputs[outputs[:, 4] > 0.5]
+outputs[:, :4] *= [w / size, h / size, w / size, h / size]  # back to image pixels
+```
 
 ### Train
 
@@ -39,7 +80,7 @@ Hyper-parameters and class names: `utils/args.yaml`.
 ### Demo
 
 * Run `python main.py --model s --demo` to run `./weights/best.pt` on the webcam
-* `--weights` takes `*.pt`, official `*.pth` / `*.safetensors` or a TensorRT `*.engine`
+* `--weights` takes `*.pt`, official `*.pth` / `*.safetensors`, `*.onnx` or a TensorRT `*.engine`
 * `--source 1`, `--source video.mp4`, `--source rtsp://...` select another camera, a file or a stream
 * `--conf 0.5` sets the score threshold
 
@@ -47,6 +88,7 @@ Hyper-parameters and class names: `utils/args.yaml`.
 
 * Run `python main.py --model s --export` for ONNX (FP32, onnxruntime / CPU)
 * Run `python main.py --model s --export engine --batch-size 4` for TensorRT FP16 (max batch 4)
+* `--export engine --weights *_fp16.onnx` builds the engine directly from an exported ONNX
 * Input: `images` (N, 3, H, W) RGB in [0, 1], normalization is inside the model
 * Output: `outputs` (N, 300, 6) as `x1, y1, x2, y2, score, class` in input pixels, no NMS
 * TensorRT >= 10.6. An engine runs only on the GPU and TensorRT version that built it

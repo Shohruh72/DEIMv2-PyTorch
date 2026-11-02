@@ -149,6 +149,24 @@ class TensorRT(torch.nn.Module):
         return y
 
 
+class ONNX(torch.nn.Module):
+    """
+    Runs an ONNX of `export_onnx` with onnxruntime (CUDA if available, else CPU), same input / output as End2End
+    """
+
+    def __init__(self, f):
+        import onnxruntime
+
+        super().__init__()
+        providers = [p for p in ('CUDAExecutionProvider', 'CPUExecutionProvider')
+                     if p in onnxruntime.get_available_providers()]
+        self.session = onnxruntime.InferenceSession(f, providers=providers)
+
+    def forward(self, x):
+        y = self.session.run(['outputs'], {'images': x.float().cpu().numpy()})[0]
+        return torch.from_numpy(y).to(x.device)
+
+
 # ---------------------------------------------------------------- boxes
 def wh2xy(x):
     cx, cy, w, h = x.unbind(-1)
